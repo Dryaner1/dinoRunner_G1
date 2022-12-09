@@ -1,9 +1,11 @@
 import pygame
-from dino_runner.utils.constants import BG, ICON, SCREEN_HEIGHT, SCREEN_WIDTH, TITLE, FPS
+from dino_runner.utils.constants import BG, ICON, SCREEN_HEIGHT, SCREEN_WIDTH, TITLE, FPS, DINO_START, DINO_DEAD#, MENU_SONG # -->musica menu(fallando)
 from dino_runner.components.dinosaur.dinosaur import Dinosaur
 from dino_runner.components.obstacle.obstableManager import ObstacleManager
 from dino_runner.components.score_menu.text_utils import *
 from dino_runner.components.player_hearts.player_heart_manager import PlayerHeartManager
+from dino_runner.components.powerup.powerupmanager import PowerUpManager
+from dino_runner.components.obstacle.obstacle import Obstacle
 
 class Game:
     def __init__(self):
@@ -23,10 +25,20 @@ class Game:
         self.death_count = 0
         self.running = True
         self.player_heart_manager = PlayerHeartManager()
+        self.show_text=False
+
+        self.power_up_manager = PowerUpManager()
+
+        self.dinostart = DINO_START
+        #self.menu_song = MENU_SONG # -->musica menu(fallando)
+
 
     def run(self):
+        self.points = 0
+        self.game_speed = 20
         self.obstacle_manager.reset_obstacle(self)
-        self.player_heart_manager.reduce_heart()
+        self.player_heart_manager.reset_hearts()
+        self.power_up_manager.reset_power_ups(self.points)
         self.playing = True
         while self.playing:
             self.events()
@@ -44,6 +56,7 @@ class Game:
         user_input = pygame.key.get_pressed()
         self.player.update(user_input)
         self.obstacle_manager.update(self)
+        self.power_up_manager.update(self.points, self.game_speed, self.player)
         
     def draw(self):
         self.clock.tick(FPS)
@@ -54,6 +67,7 @@ class Game:
         self.score()
         self.player_heart_manager.draw(self.screen)
         self.show_text=False
+        self.power_up_manager.draw(self.screen)
         
         
         pygame.display.update()
@@ -78,6 +92,12 @@ class Game:
         score, score_rect = get_score_element(self.points)
         self.screen.blit(score, score_rect)
 
+        self.player.cheak_invisivility(self.screen)
+    
+    def score_obstacles(self):
+        pass
+
+
     def show_menu(self):
         self.running = True
 
@@ -93,14 +113,27 @@ class Game:
         half_screen_width = SCREEN_WIDTH //2
 
         if death_count ==0:
-            text, text_rect = get_centered_message("Press any key to Start")
+            #dinostart_rect = self.dinostart.get_rect()
+            self.screen.blit(self.dinostart, [80,310])
+
+            text, text_rect = get_centered_message("Press any key to Start") # --> pantalla de inicio
             self.screen.blit(text, text_rect)
+            #self.menu_song.play() # -->musica menu(fallando)
+            
         elif death_count > 0:
-            text, text_rect = get_centered_message("Press any key to Restart")
+            text, text_rect = get_centered_message("Press any key to Restart") # --> pantalla restart
             score, score_rect = get_centered_message("Your score: " + str(self.points),
-            heigth= half_screen_height + 50  )
+            heigth= half_screen_height + 100  )
+
+            heart, heart_rect = get_centered_message("Dino death: " + str(self.death_count),
+            heigth= half_screen_height + 150  )
+            
             self.screen.blit(score, score_rect)
             self.screen.blit(text, text_rect)
+            self.screen.blit(heart, heart_rect)
+
+            self.screen.blit(DINO_DEAD, [half_screen_width -10, half_screen_height - 150])
+
 
     def handle_key_events_on_menu(self):
         for event in pygame.event.get():
@@ -113,4 +146,6 @@ class Game:
                 exit()
             if(event.type == pygame.KEYDOWN):
                 self.run()
+
+    
 

@@ -72,3 +72,12 @@ HEART = pygame.image.load(os.path.join(IMG_DIR, 'Other/SmallHeart.png'))
 DEFAULT_TYPE = "default"
 
 HEART_COUNT = 4
+
+SHIELD_TYPE = "shield"
+
+## Nuevos agregados
+DINO_START = pygame.image.load(os.path.join(IMG_DIR, 'Dino/DinoStart.png'))
+
+DINO_DEAD = pygame.image.load(os.path.join(IMG_DIR, 'Dino/DinoDead.png'))
+
+#MENU_SONG = pygame.mixer.music.load('dino_runner/MenuSong.mp3') # -->musica menu(fallando)
